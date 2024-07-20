@@ -74,7 +74,7 @@ class Dropdown(disnake.ui.StringSelect):
         elif self.values[0] == 'Настройка автомодерации':
             await interaction.response.send_message('Настройка автомодерации ', view = AutomodSettingsMenu())
 
-class DropdownMenu(disnake.ui.View):
+class DropdownSettingsMenu(disnake.ui.View):
     def __init__(self):
         super().__init__()
         self.add_item(Dropdown())
@@ -87,7 +87,7 @@ class Settings(commands.Cog):
     async def settings(self, ctx: disnake.ApplicationCommandInteraction):
         global guild
         guild = ctx.guild
-        await ctx.send('Настройка бота', view=self.DropdownMenu())
+        await ctx.send('Настройка бота', view=DropdownSettingsMenu())
 
 
 
