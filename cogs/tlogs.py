@@ -16,8 +16,6 @@ class Tlogs(commands.Cog):
     log_folder = "logs"
     current_log_date = None
     current_log_file = None
-    connection = sqlite3.connect('economy.db')
-    cursor = connection.cursor()
 
     async def log_message(self, message, event_type):
         global current_log_date

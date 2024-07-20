@@ -2,20 +2,17 @@ import disnake
 from disnake.ext import commands
 from datetime import datetime
 import pytz
-import sqlite3
+from database.db import Db
 
 class Thread(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     moscow_tz = pytz.timezone('Europe/Moscow')
 
-    conn = sqlite3.connect('tlogs.db')
-    c = conn.cursor()
-    c.execute("SELECT channel_id FROM tlogs LIMIT 1")
-    result = c.fetchone()
+
+    db = Db()
     global channel_id
-    channel_id = int(result[0])
-    conn.commit()
+    channel_id = int(db.get_channel_id())
 
     @commands.Cog.listener()
     async def on_thread_create(self, thread: disnake.Thread):
