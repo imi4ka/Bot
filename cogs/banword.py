@@ -12,7 +12,7 @@ class Banwords(commands.Cog):
 
 
     def read_file():
-        with open('ban_words.txt', 'r', encoding='utf-8') as file:
+        with open('file/ban_words.txt', 'r', encoding='utf-8') as file:
             text = file.read()
             words = text.split()
             ban_words = words.copy()
