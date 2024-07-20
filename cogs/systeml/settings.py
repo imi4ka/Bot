@@ -1,7 +1,5 @@
 import disnake
 from disnake.ext import commands
-import pytz
-import datetime
 import sqlite3
 
 guild = None
