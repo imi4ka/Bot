@@ -2,6 +2,10 @@ import disnake
 from disnake.ext import commands
 from datetime import datetime
 import pytz
+from database.db import Db
+db = Db()
+global channel_id
+channel_id = int(db.get_channel_id())
 
 
 class Banwords(commands.Cog):
@@ -56,7 +60,8 @@ class Banwords(commands.Cog):
                 emb.add_field(name='Нарушитель:', value=message.author.mention, inline=True)
                 emb.add_field(name='Тип:', value='Мат/Оскорбление/Травля см. содержание', inline=True)
                 emb.add_field(name='Содержимое:', value=message.content, inline=True)
-                await disnake.utils.get(message.guild.text_channels, id=1262100877066633267).send(embed=emb)
+                channel = self.bot.get_channel(channel_id)
+                await channel.send(embed=emb)
                 return
 
 

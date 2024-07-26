@@ -2,6 +2,11 @@ import disnake
 from disnake.ext import commands
 from datetime import datetime
 import pytz
+from database.db import Db
+db = Db()
+global channel_id
+channel_id = int(db.get_channel_id())
+
 
 class Voice(commands.Cog):
     def __init__(self, bot):
@@ -21,7 +26,8 @@ class Voice(commands.Cog):
         elif  before.channel != after.channel:
             embed.add_field(name = '', value = f'**{member.mention} Сменил голосовой канал c `{before.channel.name}` на `{after.channel.name}`**', inline = False)
         embed.set_footer(text=f"{guild.name} • Дата отключения: {datetime.now(tz=self.moscow_tz).strftime('%B %d, %Y %H:%M')}")
-        await disnake.utils.get(member.guild.text_channels, id=1262100877066633267).send(embed=embed)
+        channel = self.bot.get_channel(channel_id)
+        await channel.send(embed=embed)
 
 
 

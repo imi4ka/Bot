@@ -1,14 +1,9 @@
 import disnake
 from disnake.ext import commands
 import sqlite3
+from database.db import Db
 
-guild = None
-global conn
-conn = sqlite3.connect('tlogs.db')
-global c
-c = conn.cursor()
-c.execute('''CREATE TABLE IF NOT EXISTS tlogs(channel_id TEXT)''')
-
+db = Db()
 
 class Functionn(disnake.ui.StringSelect):
     def __init__(self):
@@ -29,8 +24,7 @@ class Channelsl(disnake.ui.StringSelect):
         super().__init__(placeholder = 'Channel select', options = options)
 
     async def callback(self, inter: disnake.MessageInteraction):
-        c.execute("UPDATE tlogs SET channel_id = ?", (inter.values[0],))
-        conn.commit()
+        db.update_tabel_settings(inter.values[0])
         await inter.response.send_message(f'Канал с ID {inter.values[0]} успешно выбран.')
 
 class ChannelslMenu(disnake.ui.View):

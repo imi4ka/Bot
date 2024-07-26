@@ -4,15 +4,16 @@ from datetime import datetime
 import pytz
 from database.db import Db
 
+
+db = Db()
+global channel_id
+channel_id = int(db.get_channel_id())
+
+
 class Thread(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     moscow_tz = pytz.timezone('Europe/Moscow')
-
-
-    db = Db()
-    global channel_id
-    channel_id = int(db.get_channel_id())
 
     @commands.Cog.listener()
     async def on_thread_create(self, thread: disnake.Thread):

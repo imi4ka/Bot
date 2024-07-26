@@ -15,6 +15,8 @@ bot = commands.Bot(command_prefix=">", intents=disnake.Intents.all(), help_comma
 TOKEN = (token)
 
 
+
+
 def load_extensions(path):
     for filename in os.listdir(path):
         if os.path.isdir(os.path.join(path, filename)):

@@ -2,6 +2,10 @@ import disnake
 from disnake.ext import commands
 from datetime import datetime
 import pytz
+from database.db import Db
+db = Db()
+global channel_id
+channel_id = int(db.get_channel_id())
 
 
 
@@ -23,7 +27,7 @@ class RoleLog(commands.Cog):
         embed.add_field(name="", value=f'**:family_mmb: Создана роль: {role.mention}**', inline=False)
         embed.add_field(name="**Ответственный модератор:**", value = admin.mention)
         embed.set_footer(text=f"{guild.name} • Дата создания: {datetime.now(tz=self.moscow_tz).strftime('%B %d, %Y %H:%M')}")
-        channel = self.bot.get_channel(1262100877066633267)  # Замените на ID нужного канала
+        channel = self.bot.get_channel(channel_id)
         await channel.send(embed=embed)
 
     @commands.Cog.listener()
@@ -36,7 +40,7 @@ class RoleLog(commands.Cog):
         embed.add_field(name="", value=f'**:family_mmb: Удалена роль: `{role.name}`**', inline=False)
         embed.add_field(name="**Ответственный модератор:**", value = admin.mention)
         embed.set_footer(text=f"{guild.name} • Дата удаления: {datetime.now(tz=self.moscow_tz).strftime('%B %d, %Y %H:%M')}")
-        channel = self.bot.get_channel(1262100877066633267)  # Замените на ID нужного канала
+        channel = self.bot.get_channel(channel_id)
         await channel.send(embed=embed)
 
 
@@ -44,7 +48,6 @@ class RoleLog(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_role_update(self, before, after):
         guild = after.guild
-        log_channel = self.bot.get_channel(1262100877066633267)
 
         async for entry in before.guild.audit_logs(limit=1, action=disnake.AuditLogAction.role_update): 
             admin = entry.user 
@@ -67,7 +70,8 @@ class RoleLog(commands.Cog):
             
         embed.add_field(name="Ответственный модератор:", value = admin.mention)
         embed.set_footer(text=f"{guild.name} • Дата изменения: {datetime.now(tz=self.moscow_tz).strftime('%B %d, %Y %H:%M')}")
-        await log_channel.send(embed=embed)
+        channel = self.bot.get_channel(channel_id)
+        await channel.send(embed=embed)
 
 # Доделать изменение прав ролей
 
