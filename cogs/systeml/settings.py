@@ -1,9 +1,84 @@
 import disnake
 from disnake.ext import commands
-import sqlite3
+import datetime 
 from database.db import Db
+import pytz
 
 db = Db()
+moscow_tz = pytz.timezone('Europe/Moscow')
+
+
+class EternalRole(disnake.ui.StringSelect):
+    def __init__(self):
+        eternal_role_list = list(db.get_eternal_role())
+
+        role = [role for role in guild.roles if role.name != '@everyone' if role.id != eternal_role_list]
+        
+        options = [
+            disnake.SelectOption(label = f'{i.name} 🎭 ', value = f'{i.id}') for i in role
+        ]
+        super().__init__(placeholder = 'EternalRole', options = options)
+    async def callback(self, interaction: disnake.MessageInteraction):
+        db.insert_eternal_role(interaction.values[0])
+        await interaction.response.edit_message(f'Роль с id`{interaction.values[0]}` добавлена как вечная роль.', view = None)
+
+class TemporaryRole(disnake.ui.StringSelect):
+    def __init__(self):
+        options = [
+
+        ]
+        super().__init__(placeholder = '', options = options)
+    async def callbakc(self, interaction: disnake.MessageInteraction):
+        pass
+
+class WorksRole(disnake.ui.StringSelect):
+    def __init__(self):
+        options = [
+
+        ]
+        super().__init__(placeholder = '', options = options)
+    async def callbakc(self, interaction: disnake.MessageInteraction):
+        pass
+
+class ChangeCurrency(disnake.ui.StringSelect):
+    def __init__(self):
+        options = [
+
+        ]
+        super().__init__(placeholder = '', options = options)
+    async def callbakc(self, interaction: disnake.MessageInteraction):
+        pass
+
+class EditBonuses(disnake.ui.StringSelect):
+    def __init__(self):
+        options = [
+
+        ]
+        super().__init__(placeholder = '', options = options)
+    async def callbakc(self, interaction: disnake.MessageInteraction):
+        pass
+
+class EconomyDrop(disnake.ui.StringSelect):
+    def __init__(self):
+        options = [
+            disnake.SelectOption(label = 'Изменить вечные роли', emoji = '🛎'),
+            disnake.SelectOption(label = 'Изменить временные роли', emoji = '🛎'),
+            disnake.SelectOption(label = 'Изменить рабочие роли', emoji = '🛎'),
+            disnake.SelectOption(label = 'Изменить игровую валюту', emoji = '💵'),
+            disnake.SelectOption(label = 'Настройка бонусов', emoji = '💰')
+        ]
+        super().__init__(placeholder = 'Economy', options = options)
+    async def callback(self, interaction: disnake.MessageInteraction):
+        if self.values[0] == 'Изменить вечные роли':
+            await interaction.response.edit_message('', view = EternalRoleMenu())
+        elif self.values[0] == 'Изменить временные роли':
+            await interaction.response.edit_message('', view = TemporaryRoleMenu())
+        elif self.values[0] == 'Изменить рабочие роли':
+            await interaction.response.edit_message('', view = WorksRoleMenu())
+        elif self.values[0] == 'Изменить игровую валюту':
+            await interaction.response.edit_message('', view = ChangeCurrencyMenu())
+        elif self.values[0] == 'Настройка бонусов':
+            await interaction.response.edit_message('', view = EditBonusesMenu())
 
 class Functionn(disnake.ui.StringSelect):
     def __init__(self):
@@ -13,9 +88,9 @@ class Functionn(disnake.ui.StringSelect):
         super().__init__(placeholder = 'Settings function', options = options)
 
     async def callback(self, inter: disnake.MessageInteraction):
-        await inter.response.send_message('Выберите канал для отправки логов', view = ChannelslMenu())   
+        await inter.response.edit_message('Выберите канал для отправки логов', view = ChannelsLogMenu())   
 
-class Channelsl(disnake.ui.StringSelect):
+class ChannelsLog(disnake.ui.StringSelect):
     def __init__(self):
         channel = [channel for channel in guild.channels if channel.type == disnake.ChannelType.text]
         options = [
@@ -25,12 +100,12 @@ class Channelsl(disnake.ui.StringSelect):
 
     async def callback(self, inter: disnake.MessageInteraction):
         db.update_tabel_settings(inter.values[0])
-        await inter.response.send_message(f'Канал с ID {inter.values[0]} успешно выбран.')
+        await inter.response.edit_message(f'Канал с ID {inter.values[0]} успешно выбран.', view = None)
 
-class ChannelslMenu(disnake.ui.View):
+class ChannelsLogMenu(disnake.ui.View):
     def __init__(self):
         super().__init__()
-        self.add_item(Channelsl())
+        self.add_item(ChannelsLog())
 
 class Automod(disnake.ui.StringSelect):
     def __init__(self):
@@ -40,7 +115,7 @@ class Automod(disnake.ui.StringSelect):
         super().__init__(placeholder = 'Settings automod', options = options)
 
     async def callback(self, inter: disnake.MessageInteraction):
-        await inter.response.send_message('1')
+        await inter.response.edit_message('1', view = None)
 
 class AutomodSettingsMenu(disnake.ui.View):
     def __init__(self):
@@ -51,20 +126,53 @@ class FunctionSettingsMenu(disnake.ui.View):
     def __init__(self):
         super().__init__()
         self.add_item(Functionn())
+    
+class EconomySettingsMenu(disnake.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.add_item(EconomyDrop())
+
+class EternalRoleMenu(disnake.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.add_item(EternalRole())
+
+class TemporaryRoleMenu(disnake.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.add_item(TemporaryRole())
+
+class WorksRoleMenu(disnake.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.add_item(WorksRole())
+
+class ChangeCurrencyMenu(disnake.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.add_item(ChangeCurrency())
+
+class EditBonusesMenu(disnake.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.add_item(EditBonuses())
 
 class Dropdown(disnake.ui.StringSelect):
     def __init__(self):
         options = [
-            disnake.SelectOption(label = 'Настройка функций', description = 'Настройка внутренних функций бота.', emoji = '⚙'),
-            disnake.SelectOption(label = 'Настройка автомодерации', description = 'Настройка функций автомода', emoji = '👑')
+            disnake.SelectOption(label = 'Логи', description = 'Настройка внутренних функций бота.', emoji = '⚙'),
+            disnake.SelectOption(label = 'Модерация', description = 'Настройка функций автомода', emoji = '👑'),
+            disnake.SelectOption(label = 'Экономика', description = 'Настройка экономики сервера', emoji = '🌌')
         ]
         super().__init__(placeholder = 'Settings', options = options) 
 
     async def callback(self, interaction: disnake.MessageInteraction):
-        if self.values[0] == 'Настройка функций':
-            await interaction.response.send_message('Настройки функций бота:', view = FunctionSettingsMenu())
-        elif self.values[0] == 'Настройка автомодерации':
-            await interaction.response.send_message('Настройка автомодерации ', view = AutomodSettingsMenu())
+        if self.values[0] == 'Логи':
+            await interaction.response.edit_message('Настройки функций бота:', view = FunctionSettingsMenu())
+        elif self.values[0] == 'Модерация':
+            await interaction.response.edit_message('Настройка автомодерации ', view = AutomodSettingsMenu())
+        elif self.values[0] == 'Экономика':
+            await interaction.response.edit_message('1', view = EconomySettingsMenu())
 
 class DropdownSettingsMenu(disnake.ui.View):
     def __init__(self):
