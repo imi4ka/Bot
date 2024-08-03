@@ -1,44 +1,100 @@
 import disnake
 from disnake.ext import commands
-import datetime 
+from datetime import datetime
 from database.db import Db
 import pytz
 
-db = Db()
 moscow_tz = pytz.timezone('Europe/Moscow')
+db = Db()
 
+class Embeds_message():
+    def main(self, ctx: disnake.ApplicationCommandInteraction, member: disnake.Member):
+        embed = disnake.Embed( 
+            color = disnake.Color.dark_gray(), 
+            description = 'Взаимодействуйте с выпадающим меню выбора, чтобы настроить сервер.', 
+            title = '**Настройка модулей бота.**'
+            )
+        embed.set_footer(text=f"Запрос выполнил {ctx.author} • Сегодня, в {datetime.now(tz = moscow_tz).strftime('%H:%M')}", icon_url = member.display_avatar.url)
+        return embed
+    
+    def audit_logs_channel(self, member: disnake.Member):
+        embed = disnake.Embed( 
+            color = disnake.Color.dark_gray(), 
+            description = 'Это различные типы событий, которые срабатывают при удалении сообщений, использовании команд и действиях по модерации.', 
+            title = '**Журнал действий.**'
+            )
+        embed.add_field(name = '*Используйте кнопки для управления настройками.*', value = '', inline = False)
+        embed.set_footer(text=f"Запрос выполнил {member.name} • Сегодня, в {datetime.now(tz = moscow_tz).strftime('%H:%M')}", icon_url = member.display_avatar.url)
+        return embed
+
+    def shop_settings(self, member: disnake.Member):
+        embed = disnake.Embed( 
+            color = disnake.Color.dark_gray(), 
+            description = '', 
+            title = '**Экономика.**'
+            )
+        embed.add_field(name = '', value = '', inline = False)
+        embed.set_footer(text=f"Запрос выполнил {member.name} • Сегодня, в {datetime.now(tz = moscow_tz).strftime('%H:%M')}", icon_url = member.display_avatar.url)
+        return embed
+
+emb = Embeds_message()
 
 class EternalRole(disnake.ui.StringSelect):
     def __init__(self):
-        eternal_role_list = list(db.get_eternal_role())
+        list = db.get_economy_all_role_id()
+        for list in list:
+            list = [list[0], list[1], list[2]]
 
-        role = [role for role in guild.roles if role.name != '@everyone' if role.id != eternal_role_list]
-        
+        if list != None:
+            self.eternal_role_list = list
+        else:
+            self.eternal_role_list = []
+        role = [role for role in guild.roles if role.name != '@everyone']
         options = [
-            disnake.SelectOption(label = f'{i.name} 🎭 ', value = f'{i.id}') for i in role
+            disnake.SelectOption(label = f'{i.name} 🎭 ', value = f'{i.id}') for i in role if str(i.id) not in self.eternal_role_list
         ]
         super().__init__(placeholder = 'EternalRole', options = options)
     async def callback(self, interaction: disnake.MessageInteraction):
-        db.insert_eternal_role(interaction.values[0])
-        await interaction.response.edit_message(f'Роль с id`{interaction.values[0]}` добавлена как вечная роль.', view = None)
+        db.insert_economy_eternal_role(interaction.values[0])
+        await interaction.response.edit_message(f'Роль с id`{interaction.values[0]}` добавлена как вечная роль.', view = EternalRoleMenu())
 
 class TemporaryRole(disnake.ui.StringSelect):
     def __init__(self):
-        options = [
+        list = db.get_economy_all_role_id()
+        for list in list:
+            list = [list[0], list[1], list[2]]
 
+        if list != None:
+            self.eternal_role_list = list
+        else:
+            self.eternal_role_list = []
+        role = [role for role in guild.roles if role.name != '@everyone']
+        options = [
+            disnake.SelectOption(label = f'{i.name} 🎭 ', value = f'{i.id}') for i in role if str(i.id) not in self.eternal_role_list
         ]
-        super().__init__(placeholder = '', options = options)
-    async def callbakc(self, interaction: disnake.MessageInteraction):
-        pass
+        super().__init__(placeholder = 'EternalRole', options = options)
+    async def callback(self, interaction: disnake.MessageInteraction):
+        db.insert_economy_temporary_role(interaction.values[0])
+        await interaction.response.edit_message(f'Роль с id`{interaction.values[0]}` добавлена как временная роль.', view = TemporaryRoleMenu)  
 
 class WorksRole(disnake.ui.StringSelect):
     def __init__(self):
-        options = [
+        list = db.get_economy_all_role_id()
+        for list in list:
+            list = [list[0], list[1], list[2]]
 
+        if list != None:
+            self.eternal_role_list = list
+        else:
+            self.eternal_role_list = []
+        role = [role for role in guild.roles if role.name != '@everyone']
+        options = [
+            disnake.SelectOption(label = f'{i.name} 🎭 ', value = f'{i.id}') for i in role if str(i.id) not in self.eternal_role_list
         ]
-        super().__init__(placeholder = '', options = options)
-    async def callbakc(self, interaction: disnake.MessageInteraction):
-        pass
+        super().__init__(placeholder = 'EternalRole', options = options)
+    async def callback(self, interaction: disnake.MessageInteraction):
+        db.insert_economy_worker_role(interaction.values[0])
+        await interaction.response.edit_message(f'Роль с id`{interaction.values[0]}` добавлена как вечная роль.', view = WorksRoleMenu())
 
 class ChangeCurrency(disnake.ui.StringSelect):
     def __init__(self):
@@ -79,24 +135,14 @@ class EconomyDrop(disnake.ui.StringSelect):
             await interaction.response.edit_message('', view = ChangeCurrencyMenu())
         elif self.values[0] == 'Настройка бонусов':
             await interaction.response.edit_message('', view = EditBonusesMenu())
-
-class Functionn(disnake.ui.StringSelect):
-    def __init__(self):
-        options = [
-            disnake.SelectOption(label = '**Канал логов**', description = 'Выбрать канал для логов.', emoji = '🛡')
-        ]
-        super().__init__(placeholder = 'Settings function', options = options)
-
-    async def callback(self, inter: disnake.MessageInteraction):
-        await inter.response.edit_message('Выберите канал для отправки логов', view = ChannelsLogMenu())   
-
+ 
 class ChannelsLog(disnake.ui.StringSelect):
     def __init__(self):
         channel = [channel for channel in guild.channels if channel.type == disnake.ChannelType.text]
         options = [
             disnake.SelectOption(label = f'{i.name}', description = f'{i.id}', emoji = '📃', value = f'{i.id}') for i in channel                                
         ]
-        super().__init__(placeholder = 'Channel select', options = options)
+        super().__init__(placeholder = 'Выбрать канал', options = options)
 
     async def callback(self, inter: disnake.MessageInteraction):
         db.update_tabel_settings(inter.values[0])
@@ -121,11 +167,6 @@ class AutomodSettingsMenu(disnake.ui.View):
     def __init__(self):
         super().__init__()
         self.add_item(Automod())
-
-class FunctionSettingsMenu(disnake.ui.View):
-    def __init__(self):
-        super().__init__()
-        self.add_item(Functionn())
     
 class EconomySettingsMenu(disnake.ui.View):
     def __init__(self):
@@ -160,15 +201,15 @@ class EditBonusesMenu(disnake.ui.View):
 class Dropdown(disnake.ui.StringSelect):
     def __init__(self):
         options = [
-            disnake.SelectOption(label = 'Логи', description = 'Настройка внутренних функций бота.', emoji = '⚙'),
+            disnake.SelectOption(label = 'Журнал действий', description = 'Настройка внутренних функций бота.', emoji = '⚙'),
             disnake.SelectOption(label = 'Модерация', description = 'Настройка функций автомода', emoji = '👑'),
             disnake.SelectOption(label = 'Экономика', description = 'Настройка экономики сервера', emoji = '🌌')
         ]
-        super().__init__(placeholder = 'Settings', options = options) 
+        super().__init__(placeholder = 'Настройки сервера', options = options) 
 
-    async def callback(self, interaction: disnake.MessageInteraction):
-        if self.values[0] == 'Логи':
-            await interaction.response.edit_message('Настройки функций бота:', view = FunctionSettingsMenu())
+    async def callback(self, interaction: disnake.MessageCommandInteraction):
+        if self.values[0] == 'Журнал действий':
+            await interaction.response.edit_message(embed = emb.audit_logs_channel(interaction.user) , view = ChannelsLogMenu())
         elif self.values[0] == 'Модерация':
             await interaction.response.edit_message('Настройка автомодерации ', view = AutomodSettingsMenu())
         elif self.values[0] == 'Экономика':
@@ -187,7 +228,7 @@ class Settings(commands.Cog):
     async def settings(self, ctx: disnake.ApplicationCommandInteraction):
         global guild
         guild = ctx.guild
-        await ctx.send('Настройка бота', view=DropdownSettingsMenu())
+        await ctx.send(embed = emb.main(ctx, ctx.author) , view=DropdownSettingsMenu())
 
 
 
