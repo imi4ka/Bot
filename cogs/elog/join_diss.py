@@ -4,9 +4,10 @@ from datetime import datetime
 import pytz
 from database.db import Db
 db = Db()
-global channel_id
-channel_id = int(db.get_channel_id())
 
+def sinc_channel_id():
+    channel_id = int(db.get_channel_id())
+    return channel_id
 
 class Join_Diss(commands.Cog):
     def __init__(self, bot):
@@ -30,7 +31,7 @@ class Join_Diss(commands.Cog):
         embed.add_field(name="Дата регистрации аккаунта", value=f"{member.created_at.astimezone(self.moscow_tz).strftime('%Y/%m/%d %H:%M:%S')}", inline=False)
         embed.add_field(name="", value=f"{(datetime.now(tz=self.moscow_tz) - member.created_at.astimezone(self.moscow_tz)).days // 365} лет назад", inline=False)
         embed.set_footer(text=f"{guild.name} • Дата выхода: {datetime.now(tz=self.moscow_tz).strftime('%B %d, %Y %H:%M')}")
-        channel = self.bot.get_channel(channel_id)
+        channel = self.bot.get_channel(sinc_channel_id())
         await channel.send(embed=embed)
 
     @commands.Cog.listener()
@@ -53,7 +54,8 @@ class Join_Diss(commands.Cog):
             embed.add_field(name="Дата вступления на сервер", value=f"{joined_at}", inline=False)
             embed.add_field(name="Время, проведенное на сервере:", value=f"{days_on_server} дней, {hours_on_server} часов, {minutes_on_server} минут, {seconds_on_server} секунд", inline=False)
             embed.set_footer(text=f"{guild.name} • Дата выхода: {datetime.now(tz=moscow_tz).strftime('%B %d, %Y %H:%M')}")
-            channel = self.bot.get_channel(channel_id)
+            channel = self.bot.get_channel(sinc_channel_id())
+            print(channel)
             await channel.send(embed=embed)
             db.delete_members_member_id(member.id)
         else:
@@ -76,8 +78,7 @@ class Join_Diss(commands.Cog):
         embed.add_field(name = '', value = f'**Код ссылки:** `{invite.id}`', inline = False)
         embed.add_field(name = '', value = f'[Ссылка]({invite.url})')
         embed.set_footer(text = f'{guild.name} • Дата выхода: {datetime.now(tz=self.moscow_tz).strftime('%B %d, %Y %H:%M')}')
-        channel = self.bot.get_channel(1262100877066633267)
-        channel = self.bot.get_channel(channel_id)
+        channel = self.bot.get_channel(sinc_channel_id())
         await channel.send(embed=embed)
     
     @commands.Cog.listener()
@@ -90,7 +91,7 @@ class Join_Diss(commands.Cog):
         embed.add_field(name = '', value = f'{creator.mention} **Удалил ссылку приглашения на сервер.**', inline = False)
         embed.add_field(name = '', value = f'**Код ссылки:** `{invite.id}`', inline = False)
         embed.set_footer(text = f'{guild.name} • Дата выхода: {datetime.now(tz=self.moscow_tz).strftime('%B %d, %Y %H:%M')}')
-        channel = self.bot.get_channel(channel_id)
+        channel = self.bot.get_channel(sinc_channel_id())
         await channel.send(embed=embed)
 
         

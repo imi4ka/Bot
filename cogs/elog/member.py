@@ -4,8 +4,9 @@ from datetime import datetime
 import pytz
 from database.db import Db
 db = Db()
-global channel_id
-channel_id = int(db.get_channel_id())
+def sinc_channel_id():
+    channel_id = int(db.get_channel_id())
+    return channel_id
 
 class Member(commands.Cog):
     def __init__(self, bot):
@@ -37,7 +38,7 @@ class Member(commands.Cog):
                 embed.add_field(name = '', value = f'**Изменённ никнейм участника с** `{before.nick}` **на** `{after.nick}`')
 
             embed.set_footer(text=f"{guild.name} • Дата изменения: {datetime.now(tz=self.moscow_tz).strftime('%B %d, %Y %H:%M')}")
-            channel = self.bot.get_channel(channel_id)
+            channel = self.bot.get_channel(sinc_channel_id())
             await channel.send(embed=embed)
 
     @commands.Cog.listener()
@@ -52,7 +53,7 @@ class Member(commands.Cog):
             embed.add_field(name="", value=f'{user.mention} **Был забанен на сервере по причине:** `{reason}`.', inline=False)
             embed.add_field(name="**Ответственный модератор:**", value = admin.mention)
             embed.set_footer(text=f"{guild.name} • Дата бана: {datetime.now(tz=self.moscow_tz).strftime('%B %d, %Y %H:%M')}")
-        channel = self.bot.get_channel(channel_id)  # Замените на ID нужного канала
+        channel = self.bot.get_channel(sinc_channel_id())  # Замените на ID нужного канала
         await channel.send(embed=embed)
 
     @commands.Cog.listener()
@@ -66,7 +67,7 @@ class Member(commands.Cog):
         embed.add_field(name="", value=f'{user.mention} **Был разбанен.**', inline=False)
         embed.add_field(name="**Ответственный модератор:**", value = admin.mention)
         embed.set_footer(text=f"{guild.name} • Дата разбана: {datetime.now(tz=self.moscow_tz).strftime('%B %d, %Y %H:%M')}")
-        channel = self.bot.get_channel(channel_id)  # Замените на ID нужного канала
+        channel = self.bot.get_channel(sinc_channel_id())  # Замените на ID нужного канала
         await channel.send(embed=embed)
     
 def setup(bot):

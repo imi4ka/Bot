@@ -4,8 +4,9 @@ from datetime import datetime
 import pytz
 from database.db import Db
 db = Db()
-global channel_id
-channel_id = int(db.get_channel_id())
+def sinc_channel_id():
+    channel_id = int(db.get_channel_id())
+    return channel_id
 
 
 class Voice(commands.Cog):
@@ -26,7 +27,7 @@ class Voice(commands.Cog):
         elif  before.channel != after.channel:
             embed.add_field(name = '', value = f'**{member.mention} Сменил голосовой канал c `{before.channel.name}` на `{after.channel.name}`**', inline = False)
         embed.set_footer(text=f"{guild.name} • Дата отключения: {datetime.now(tz=self.moscow_tz).strftime('%B %d, %Y %H:%M')}")
-        channel = self.bot.get_channel(channel_id)
+        channel = self.bot.get_channel(sinc_channel_id())
         await channel.send(embed=embed)
 
 

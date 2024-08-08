@@ -6,8 +6,9 @@ from database.db import Db
 
 
 db = Db()
-global channel_id
-channel_id = int(db.get_channel_id())
+def sinc_channel_id():
+    channel_id = int(db.get_channel_id())
+    return channel_id
 
 
 class Thread(commands.Cog):
@@ -24,11 +25,8 @@ class Thread(commands.Cog):
         embed.add_field(name = '', value = f'**Создатель ветки:** {thread.owner.mention}', inline = False)
         embed.add_field(name = '', value = f'[Перейти к ветке]({thread.jump_url})', inline = False)
         embed.set_footer(text=f"{guild.name} • Дата создания: {datetime.now(tz=self.moscow_tz).strftime('%B %d, %Y %H:%M')}")
-        log_channel = self.bot.get_channel(channel_id)
-        if log_channel is not None:
-            await log_channel.send(embed=embed)
-        else:
-            print(f"Не удалось найти канал с ID {channel_id}")
+        log_channel = self.bot.get_channel(sinc_channel_id())
+        await log_channel.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_thread_delete(self, thread):
@@ -39,7 +37,7 @@ class Thread(commands.Cog):
         embed.add_field(name = '', value = f'**Создатель ветки:** {thread.owner.mention}', inline = False)
         embed.add_field(name = '', value = f'**Общее кол-во сообщений в ветке:** {thread.message_count}')
         embed.set_footer(text=f"{guild.name} • Дата удаления: {datetime.now(tz=self.moscow_tz).strftime('%B %d, %Y %H:%M')}")
-        log_channel = self.bot.get_channel(channel_id)
+        log_channel = self.bot.get_channel(sinc_channel_id())
         await log_channel.send(embed=embed)
 
 
